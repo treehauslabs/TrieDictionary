@@ -121,42 +121,6 @@ final class TransformationTests: XCTestCase {
         XCTAssertNil(result["test"])
     }
 
-    func testMatching() {
-        let dict: TrieDictionary<Int> = ["a": 1, "aa": 2, "aaa": 3, "b": 4]
-        let result = dict.matching { $0.count == 1 }
-        XCTAssertEqual(result.count, 2)
-        XCTAssertEqual(result["a"], 1)
-        XCTAssertEqual(result["b"], 4)
-    }
-
-    // MARK: - Key Length Filtering
-
-    func testFilteringKeyLength() {
-        let dict: TrieDictionary<Int> = ["a": 1, "ab": 2, "abc": 3, "abcd": 4]
-        XCTAssertEqual(dict.filteringKeyLength { $0 >= 3 }.count, 2)
-    }
-
-    func testWithMinKeyLength() {
-        let dict: TrieDictionary<String> = ["a": "1", "ab": "2", "abc": "3"]
-        let result = dict.withMinKeyLength(2)
-        XCTAssertEqual(result.count, 2)
-        XCTAssertNil(result["a"])
-    }
-
-    func testWithMaxKeyLength() {
-        let dict: TrieDictionary<String> = ["a": "1", "ab": "2", "abc": "3"]
-        let result = dict.withMaxKeyLength(2)
-        XCTAssertEqual(result.count, 2)
-        XCTAssertNil(result["abc"])
-    }
-
-    func testWithKeyLength() {
-        let dict: TrieDictionary<Int> = ["a": 1, "ab": 2, "abc": 3, "abcd": 4]
-        let result = dict.withKeyLength(3)
-        XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result["abc"], 3)
-    }
-
     // MARK: - Partitioning
 
     func testPartitioned() {
@@ -168,36 +132,6 @@ final class TransformationTests: XCTestCase {
         XCTAssertEqual(odds.count, 2)
         XCTAssertEqual(odds["a"], 1)
         XCTAssertEqual(odds["c"], 3)
-    }
-
-    // MARK: - replacingValues
-
-    func testReplacingValues() {
-        let dict: TrieDictionary<String> = ["hello": "world", "foo": "bar"]
-        let result = dict.replacingValues { key, value in key.count + value.count }
-        XCTAssertEqual(result["hello"], 10)
-        XCTAssertEqual(result["foo"], 6)
-    }
-
-    // MARK: - uniqueValues
-
-    func testUniqueValues() {
-        let dict: TrieDictionary<String> = ["a": "dup", "b": "unique", "c": "dup", "d": "another"]
-        let result = dict.uniqueValues()
-        XCTAssertEqual(result.count, 3)
-    }
-
-    // MARK: - transformAndFilter
-
-    func testTransformAndFilter() {
-        let dict: TrieDictionary<Int> = ["a": 1, "b": 2, "c": 3, "d": 4]
-        let result: TrieDictionary<Int> = dict.transformAndFilter { elem in
-            guard elem.value % 2 == 0 else { return nil }
-            return (elem.key.uppercased(), elem.value * 2)
-        }
-        XCTAssertEqual(result.count, 2)
-        XCTAssertEqual(result["B"], 4)
-        XCTAssertEqual(result["D"], 8)
     }
 
     // MARK: - Empty Dictionary Edge Cases

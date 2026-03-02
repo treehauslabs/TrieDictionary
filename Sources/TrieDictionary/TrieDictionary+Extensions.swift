@@ -339,11 +339,6 @@ extension TrieDictionary {
         return filteringKeys { $0.hasSuffix(suffix) }
     }
     
-    /// Returns a new TrieDictionary containing only keys matching the specified pattern
-    public func matching(_ predicate: (String) -> Bool) -> TrieDictionary<Value> {
-        return filteringKeys(predicate)
-    }
-    
     /// Returns a tuple of two TrieDictionaries: (matching, nonMatching) based on the predicate
     public func partitioned(by predicate: (Element) throws -> Bool) rethrows -> (matching: TrieDictionary<Value>, nonMatching: TrieDictionary<Value>) {
         var matching = TrieDictionary<Value>()
@@ -360,58 +355,4 @@ extension TrieDictionary {
         return (matching, nonMatching)
     }
     
-    /// Returns a new TrieDictionary with all values replaced by the result of the given closure applied to the key-value pair
-    public func replacingValues<T>(_ transform: (String, Value) throws -> T) rethrows -> TrieDictionary<T> {
-        var result = TrieDictionary<T>()
-        for (key, value) in self {
-            result[key] = try transform(key, value)
-        }
-        return result
-    }
-    
-    /// Returns a new TrieDictionary containing only entries where the key length matches the condition
-    public func filteringKeyLength(_ condition: (Int) -> Bool) -> TrieDictionary<Value> {
-        return filteringKeys { condition($0.count) }
-    }
-    
-    /// Returns a new TrieDictionary with keys having a minimum length
-    public func withMinKeyLength(_ minLength: Int) -> TrieDictionary<Value> {
-        return filteringKeyLength { $0 >= minLength }
-    }
-    
-    /// Returns a new TrieDictionary with keys having a maximum length
-    public func withMaxKeyLength(_ maxLength: Int) -> TrieDictionary<Value> {
-        return filteringKeyLength { $0 <= maxLength }
-    }
-    
-    /// Returns a new TrieDictionary with keys having an exact length
-    public func withKeyLength(_ exactLength: Int) -> TrieDictionary<Value> {
-        return filteringKeyLength { $0 == exactLength }
-    }
-    
-    /// Returns a new TrieDictionary containing entries where values are unique
-    public func uniqueValues() -> TrieDictionary<Value> where Value: Hashable {
-        var seenValues = Set<Value>()
-        var result = TrieDictionary<Value>()
-        
-        for (key, value) in self {
-            if !seenValues.contains(value) {
-                seenValues.insert(value)
-                result[key] = value
-            }
-        }
-        
-        return result
-    }
-    
-    /// Returns a new TrieDictionary by applying a transformation and then filtering out nils
-    public func transformAndFilter<T>(_ transform: (Element) throws -> (String, T)?) rethrows -> TrieDictionary<T> {
-        var result = TrieDictionary<T>()
-        for element in self {
-            if let (newKey, newValue) = try transform(element) {
-                result[newKey] = newValue
-            }
-        }
-        return result
-    }
 }

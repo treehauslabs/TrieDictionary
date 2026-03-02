@@ -37,7 +37,7 @@ import Foundation
  
  - Note: Path compression significantly reduces memory usage for datasets with common prefixes
  */
-public struct TrieDictionary<Value> {
+public struct TrieDictionary<Value>: Sendable where Value: Sendable {
     /// The root children array containing the compressed trie structure
     private var children: CompressedChildArray<Value>
     private var value: Value?
@@ -345,7 +345,7 @@ public struct TrieDictionary<Value> {
             return Self(newChildren)
         }
         let oldChild = children.firstChild!
-        let newChild = TrieNode(value: oldChild.nodeValue, children: oldChild.nodeChildren, compressedPath: prefix + oldChild.nodePath)
+        let newChild = TrieNode(value: oldChild.value, children: oldChild.children, compressedPath: prefix + oldChild.compressedPath)
         let newChildren = CompressedChildArray().setting(char: prefix.first!, node: newChild)
         return Self(newChildren)
     }
@@ -388,12 +388,12 @@ public struct TrieDictionary<Value> {
     
     public func traverseToNextChild(_ char: Character) -> (String, Self)? {
         guard let child = children.child(for: char) else { return nil }
-        return (child.nodePath, Self(child.nodeChildren, value: child.nodeValue))
+        return (child.compressedPath, Self(child.children, value: child.value))
     }
     
     public func getChildPrefix(_ char: Character) -> String? {
         guard let child = children.child(for: char) else { return nil }
-        return child.nodePath
+        return child.compressedPath
     }
     
     /**
@@ -435,18 +435,18 @@ public struct TrieDictionary<Value> {
      trie2["apple"] = 10
      trie2["cherry"] = 3
      
-     let merged = trie1.merge(other: trie2) { value1, value2 in
+     let merged = trie1.merging(other: trie2, uniquingKeysWith: { value1, value2 in
          return value1 + value2  // Sum conflicting values
-     }
+     })
      // merged contains: "apple" -> 11, "banana" -> 2, "cherry" -> 3
      ```
      
      - Parameter other: The other TrieDictionary to merge with
-     - Parameter mergeRule: A closure that resolves conflicts when both tries have values for the same key
+     - Parameter combine: A closure that resolves conflicts when both tries have values for the same key
      - Returns: A new TrieDictionary containing the merged result
      - Complexity: O(m + n) where m and n are the sizes of the two tries
      */
-    public func merge(other: Self, mergeRule: (Value, Value) -> Value) -> Self {
+    public func merging(other: Self, uniquingKeysWith combine: (Value, Value) -> Value) -> Self {
         // Handle trivial cases
         if isEmpty { return other }
         if other.isEmpty { return self }
@@ -454,14 +454,14 @@ public struct TrieDictionary<Value> {
         // Merge root values
         let mergedRootValue: Value?
         if let selfValue = value, let otherValue = other.value {
-            mergedRootValue = mergeRule(selfValue, otherValue)
+            mergedRootValue = combine(selfValue, otherValue)
         } else {
             mergedRootValue = value ?? other.value
         }
         
         // Merge children using the CompressedChildArray merge method
         let mergedChildren = children.merging(with: other.children) { selfNode, otherNode in
-            return selfNode.merging(with: otherNode, mergeRule: mergeRule)
+            return selfNode.merging(with: otherNode, mergeRule: combine)
         }
         
         return Self(mergedChildren, value: mergedRootValue)

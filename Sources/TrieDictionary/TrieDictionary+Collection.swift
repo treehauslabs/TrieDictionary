@@ -105,7 +105,7 @@ extension TrieDictionary: Sequence {
  This iterator pre-computes all (key, value) pairs in a single tree traversal,
  avoiding the cost of re-looking up each value by key.
  */
-public struct TrieDictionaryIterator<Value>: IteratorProtocol {
+public struct TrieDictionaryIterator<Value>: IteratorProtocol, Sendable where Value: Sendable {
     public typealias Element = (key: String, value: Value)
 
     private let pairs: [(key: String, value: Value)]

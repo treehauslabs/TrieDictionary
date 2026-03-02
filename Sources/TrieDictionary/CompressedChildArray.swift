@@ -24,7 +24,7 @@ import Foundation
  Characters are hashed to 5-bit values (0-31) using their Unicode scalar values.
  This provides better hash distribution and aligns with TreeDictionary's approach.
  */
-internal struct CompressedChildArray<Value> {
+internal struct CompressedChildArray<Value>: Sendable where Value: Sendable {
     /// Bitmap indicating which hash positions contain nodes (32 bits = 2^5 possible hash values)
     private let bitmap: UInt32
     

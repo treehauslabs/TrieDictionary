@@ -31,7 +31,7 @@ TrieDictionary stores shared prefixes once via **path compression** (radix tree)
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/TrieDictionary.git", from: "1.0.0")
+    .package(url: "https://github.com/treehauslabs/TrieDictionary.git", from: "1.0.0")
 ]
 ```
 
@@ -312,7 +312,7 @@ merged["cache.ttl"]         // 600 (remote wins)
 | `addingPrefix(_:)` | Prepend prefix to all keys |
 | `withSuffix(_:)` | Keep entries with suffix |
 | `partitioned(by:)` | Split into (matching, nonMatching) |
-| `merge(other:mergeRule:)` | Structural merge of two tries |
+| `merging(other:uniquingKeysWith:)` | Structural merge of two tries |
 | `merging(_:uniquingKeysWith:)` | Merge (Dictionary-style API) |
 
 ### Immutable Operations

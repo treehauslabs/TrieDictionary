@@ -102,7 +102,7 @@ final class CompressionTests: XCTestCase {
     func testMergePreservesCompression() {
         let a: TrieDictionary<Int> = ["verylongkey": 1]
         let b: TrieDictionary<Int> = ["verylongkeyword": 2]
-        let merged = a.merge(other: b) { a, b in a + b }
+        let merged = a.merging(other: b) { a, b in a + b }
         XCTAssertEqual(merged["verylongkey"], 1)
         XCTAssertEqual(merged["verylongkeyword"], 2)
         XCTAssertTrue(merged.isFullyCompressed)

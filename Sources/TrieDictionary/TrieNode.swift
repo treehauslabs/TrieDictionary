@@ -19,15 +19,10 @@ import Foundation
  - Zero-allocation path comparison via direct String index walking
  - Efficient path splitting and merging algorithms
  */
-internal struct TrieNode<Value> {
-    /// The value stored at this node, if any
-    private let value: Value?
-
-    /// Child nodes organized in a compressed array for efficient lookup
-    private let children: CompressedChildArray<Value>
-
-    /// The compressed path segment stored at this node
-    private let compressedPath: String
+internal struct TrieNode<Value>: Sendable where Value: Sendable {
+    let value: Value?
+    let children: CompressedChildArray<Value>
+    let compressedPath: String
 
     /**
      Creates an empty node with no value, children, or compressed path.
@@ -72,33 +67,6 @@ internal struct TrieNode<Value> {
         value == nil && children.isEmpty
     }
 
-    /**
-     Returns the value stored at this node.
-
-     - Returns: The value, or `nil` if no value is stored
-     - Complexity: O(1)
-     */
-    @inline(__always)
-    var nodeValue: Value? {
-        return value
-    }
-
-    /**
-     Returns the compressed child array for this node.
-
-     - Returns: The child nodes structure
-     - Complexity: O(1)
-     */
-    @inline(__always)
-    var nodeChildren: CompressedChildArray<Value> {
-        return children
-    }
-
-
-    @inline(__always)
-    var nodePath: String {
-        return compressedPath
-    }
 
     /**
      Returns the total number of values stored in this subtree.
@@ -312,7 +280,7 @@ internal struct TrieNode<Value> {
         }
         if newValue == nil && newChildren.childCount == 1 {
             let child = newChildren.firstChild!
-            return TrieNode<T>(value: child.nodeValue, children: child.nodeChildren, compressedPath: compressedPath + child.nodePath)
+            return TrieNode<T>(value: child.value, children: child.children, compressedPath: compressedPath + child.compressedPath)
         }
         return TrieNode<T>(value: newValue, children: newChildren, compressedPath: compressedPath)
     }
@@ -540,23 +508,4 @@ internal extension TrieNode {
         return allChildrenCompressed
     }
 
-    /**
-     Returns `true` if this node stores a value.
-
-     - Returns: `true` if a value is stored at this node
-     - Complexity: O(1)
-     */
-    var hasValue: Bool {
-        return value != nil
-    }
-
-    /**
-     Returns the number of direct child nodes.
-
-     - Returns: The count of child nodes
-     - Complexity: O(1)
-     */
-    var childCount: Int {
-        return children.childCount
-    }
 }
